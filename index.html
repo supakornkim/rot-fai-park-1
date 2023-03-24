@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      img, video {
+        max-width: 100%;
+      }
+      
+      @media (min-width: 768px) {
+        img, video {
+          width: 50%;
+        }
+      }
+      
+      /* Add styles for the loading spinner */
+      .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px;
+      }
+      
+      .spinner {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #3498db;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="media-container">
+      <div class="loading">
+        <div class="spinner"></div>
+      </div>
+    </div>
+    <div id="pagination"></div>
+    <script>
+      // Fetch the files from the GitHub repository
+            fetch("https://api.github.com/repos/supakornkim/chaiyaphum/contents")
+        .then(response => response.json())
+        .then(data => {
+          // Remove the loading spinner
+          document.querySelector(".loading").style.display = "none";
+          // Determine the number of pages needed based on the number of files
+          var pages = Math.ceil(data.length / 10);
+          // Create a variable to keep track of the current page
+          var currentPage = 1;
+          // Function to display the files for a specific page
+          function displayPage(page) {
+            // Clear the media container
+            document.getElementById("media-container").innerHTML = "";
+            // Get the start and end indices for the files to be displayed on the current page
+            var start = (page - 1) * 10;
+            var end = start + 10;
+            // Slice the data array to only get the files for the current page
+            var currentData = data.slice(start, end);
+            // Iterate through the current data array
+            currentData.forEach(file => {
+              // Check if the file is an image file
+              if (file.name.match(/\.(jpeg|jpg|gif|png)$/)) {
+                // Create an image element and set its source to the file's URL
+                var img = document.createElement("img");
+                img.src = file.download_url;
+                img.alt = "image from repository";
+                // Create a link element to download the image
+                var a = document.createElement("a");
+                a.href = file.download_url;
+                a.download = file.name;
+                a.innerHTML = file.name;
+                // Create a div element to hold the image and the link
+                                var div = document.createElement("div");
+                div.appendChild(img);
+                div.appendChild(a);
+                // Append the div element to the media container
+                document.getElementById("media-container").appendChild(div);
+              } else if (file.name.match(/\.(mp4|webm)$/)) {
+                // Create a video element and set its source to the file's URL
+                var video = document.createElement("video");
+                var source = document.createElement("source");
+                source.src = file.download_url;
+                video.appendChild(source);
+                video.controls = true;
+                video.alt = "video from repository";
+                // Create a link element to download the video
+                var a = document.createElement("a");
+                a.href = file.download_url;
+                a.download = file.name;
+                a.innerHTML = file.name;
+                // Create a div element to hold the video and the link
+                var div = document.createElement("div");
+                div.appendChild(video);
+                div.appendChild(a);
+                // Append the div element to the media container
+                document.getElementById("media-container").appendChild(div);
+                
+                            }
+            });
+          }
+          // Call the displayPage function to display the first page of files
+          displayPage(currentPage);
+          // Create the pagination buttons
+          for (var i = 1; i <= pages; i++) {
+            var button = document.createElement("button");
+            button.innerHTML = i;
+            button.addEventListener("click", function() {
+              currentPage = parseInt(this.innerHTML);
+              displayPage(currentPage);
+            });
+            document.getElementById("pagination").appendChild(button);
+          }
+        });
+    </script>
+  </body>
+</html>
+
+
